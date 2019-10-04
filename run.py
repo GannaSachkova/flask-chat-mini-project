@@ -13,10 +13,30 @@ app = Flask(__name__)
 @app.route("/")
 #we'll define the function that is going to be bound to our decorator: def index().It doesn't take any arguments.
 def index():
-#And just for now, we're going to return a <h1> that says Hello There!.
-    return "<h1>Hello There</h1>"
+#So if we go to our index page, it tells us how to use our app.So I'm going to put a message in here that says "To send a message use /<USERNAME>/<MESSAGE>"
+# Unfortunately, the angle brackets will be interpreted by the browser as HTML
+# And then I'm going to add in a docstring, which just says .
+
+    """Main page with instructions"""    
+    return "To send a message use: /USERNAME/MESSAGE"
 
 
+
+@app.route("/<username>")
+
+def user(username):
+
+    return "Hi " + username
+
+
+
+
+
+@app.route("/<username>/<message>")
+
+def send_message(username, message):
+
+    return "{0}: {1}".format(username, message)
 
 
 
