@@ -1,54 +1,61 @@
 import os
+from datetime import datetime
+from flask import Flask, redirect, render_template,request, session, url_for
 
-from flask import Flask, redirect
 
 
 # we'll initialize our new Flask application: app = Flask(__name__)
 app = Flask(__name__)
+app.secret_key="randomString123"
 messages = []
 
 
 
-# create our app root decorator, which is going to be for our index page, so that will just be ('/').
-@app.route("/")
-#we'll define the function that is going to be bound to our decorator: def index().It doesn't take any arguments.
-def index():
-#So if we go to our index page, it tells us how to use our app.So I'm going to put a message in here that says "To send a message use /<USERNAME>/<MESSAGE>"
-# Unfortunately, the angle brackets will be interpreted by the browser as HTML
-# And then I'm going to add in a docstring, which just says .
-
-    """Main page with instructions"""    
-    return "To send a message use: /USERNAME/MESSAGE"
 
 
-def add_messages(username, message):
+
+
+
+
+def add_message(username, message):
     """Add messages to the `messages` list"""
-    messages.append("{}: {}".format(username, message))
+     #The strftime() method takes a date/time object and then converts that to a string according to a given format.
+    now = datetime.now().strftime("%H:%M:%S")
+
+    messages.append({"timestamp": now, "from": username, "message": message})
 
 
+# create our app root decorator, which is going to be for our index page, so that will just be ('/').
+@app.route("/", methods=["GET", "POST"])
+def index():
+    """Main page with instructions"""
+    if request.method == "POST":
+        session["username"] = request.form["username"]
 
-
-def get_all_messages():
-    """Get all of the messages and separate them with a `br`"""
-    return "<br>".join(messages)
+    if "username" in session:
+        return redirect(url_for("user", username=session["username"]))
+    return render_template("index.html")
     
     
-    
-@app.route("/<username>")
+
+@app.route("/chat/<username>", methods=["GET", "POST"])
+
 def user(username):
-    """Display chat messages"""
-    return "<h1>Welcome, {0}</h1>{1}".format(username, get_all_messages())
+
+    """Add and display chat messages"""
+    if request.method == "POST":
+
+        username = session["username"]
+
+        message = request.form["message"]
+
+        add_message(username, message)
+
+        return redirect(url_for("user", username=session["username"]))
+    return render_template("chat.html", chat_messages =messages, username = username)
 
 
 
-@app.route("/<username>/<message>")
-def send_message(username, message):
-    """Create a new message and redirect back to the chat page"""
-    add_messages(username, message)
-    return redirect("/" + username)
 
-    
-if __name__ =="__main__":
-    app.run(host=os.getenv("IP"),
-       port=int(os.getenv("PORT")),
-       debug=True)
+
+app.run(host=os.getenv("IP"), port=int(os.getenv("PORT")), debug=True)
