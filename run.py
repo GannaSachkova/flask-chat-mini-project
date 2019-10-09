@@ -6,7 +6,7 @@ from flask import Flask, redirect, render_template,request, session, url_for
 
 # we'll initialize our new Flask application: app = Flask(__name__)
 app = Flask(__name__)
-app.secret_key="randomString123"
+app.secret_key=os.getenv("SERCTER","randomString123" )
 messages = []
 
 
@@ -58,4 +58,4 @@ def user(username):
 
 
 
-app.run(host=os.getenv("IP"), port=int(os.getenv("PORT")), debug=True)
+app.run(host=os.getenv("IP", "0.0.0.0"), port=int(os.getenv("PORT", "5000")), debug=True)
